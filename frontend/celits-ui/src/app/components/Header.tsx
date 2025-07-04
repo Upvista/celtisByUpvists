@@ -33,7 +33,7 @@ export default function Header() {
         {/* Logo & Brand */}
         <Link href="/" className="flex items-center gap-3 group">
           <span className="bg-white rounded-full p-1 flex items-center justify-center shadow-sm">
-            <Image src="/logo2.png" alt="CELTIS Logo" width={44} height={44} className="object-contain" priority />
+            <Image src="assets/logo2.png" alt="CELTIS Logo" width={44} height={44} className="object-contain" priority />
           </span>
           <span className="text-2xl font-extrabold text-blue-800 tracking-tight drop-shadow group-hover:text-emerald-600 transition">CELTIS</span>
         </Link>

@@ -21,7 +21,7 @@ export default function Footer() {
         {/* Logo & Brand */}
         <div className="flex items-center gap-3 mb-6 md:mb-0">
           <span className="bg-white rounded-full p-1 flex items-center justify-center shadow-sm">
-            <Image src="/logo2.png" alt="CELTIS Logo" width={38} height={38} className="object-contain" />
+            <Image src="assets/logo2.png" alt="CELTIS Logo" width={38} height={38} className="object-contain" />
           </span>
           <span className="text-lg font-bold text-blue-800 tracking-tight">CELTIS Inc.</span>
         </div>
