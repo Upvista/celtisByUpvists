@@ -14,7 +14,7 @@ const navItems = [
   { href: '/watch', label: 'episodes' },
   { href: '/articles', label: 'articles' },
   { href: '/events', label: 'events' },
-  { href: '/art', label: 'Art' },
+  { href: '/art', label: 'art' },
   { href: '/supporters', label: 'supporters' },
 ];
 
@@ -95,15 +95,15 @@ export default function Header() {
         </div>
       </div>
       {/* Mobile Menu Overlay and Drawer: Hide if modalOpen */}
-      {!modalOpen && (
+      {!modalOpen && menuOpen && (
         <>
           <div
-            className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-            aria-hidden={!menuOpen}
+            className="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-100 pointer-events-auto"
+            aria-hidden={false}
             onClick={() => setMenuOpen(false)}
           />
           <nav
-            className={`fixed top-0 right-0 z-[100] w-screen h-screen bg-white shadow-2xl border-l border-blue-100 transform transition-transform duration-300 ${menuOpen ? 'translate-x-0' : 'translate-x-full'} md:hidden flex flex-col pt-8 px-6 gap-4`}
+            className="fixed top-0 right-0 z-[100] w-screen h-screen bg-white shadow-2xl border-l border-blue-100 md:hidden flex flex-col pt-8 px-6 gap-4"
             aria-label="Mobile menu"
           >
             <button
@@ -133,4 +133,4 @@ export default function Header() {
       )}
     </header>
   );
-} 
+}

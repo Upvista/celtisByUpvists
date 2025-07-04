@@ -33,7 +33,7 @@ export default function RootLayout({
         <ModalProvider>
           <Header />
           <main className="flex-1 flex flex-col">
-            {children}
+        {children}
           </main>
           <Footer />
         </ModalProvider>

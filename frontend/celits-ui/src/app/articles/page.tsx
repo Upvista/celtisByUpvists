@@ -2,35 +2,112 @@
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { fetchStrapiCollection } from '../../lib/strapi';
-import { ArrowDownTrayIcon, XMarkIcon, SparklesIcon, NewspaperIcon, ChatBubbleLeftRightIcon, ShareIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, SparklesIcon, NewspaperIcon, ChatBubbleLeftRightIcon, ShareIcon, HeartIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import '../../i18n';
-import { useModal } from '../ModalProvider';
 
 interface Article {
   id: number;
-  Title: string;
-  Description?: string;
+  Title_en: string;
+  Title_jp: string;
+  Description_en: string;
+  Description_jp: string;
   Cover_Image?: { url?: string };
-  Files?: { url?: string; name?: string };
   publishedAt?: string;
-  Publish_Date?: string;
 }
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || '';
-
-function mapStrapiArticle(entry: Record<string, unknown>): Article {
-  return {
-    id: entry.id as number,
-    Title: entry.Title as string,
-    Description: entry.Description as string | undefined,
-    Cover_Image: entry.Cover_Image ? { url: (entry.Cover_Image as { url?: string }).url } : undefined,
-    Files: entry.Files ? { url: (entry.Files as { url?: string }).url, name: (entry.Files as { name?: string }).name } : undefined,
-    publishedAt: entry.publishedAt as string | undefined,
-    Publish_Date: entry.Publish_Date as string | undefined,
-  };
-}
+const HARDCODED_ARTICLES: Article[] = [
+  {
+    id: 1,
+    Title_en: 'Article 1: CELITIS Launches New Initiative',
+    Title_jp: '記事1：CELITISが新しい取り組みを開始',
+    Description_en: 'CELITIS is excited to announce a new initiative to support local communities.',
+    Description_jp: 'CELITISは地域社会を支援する新しい取り組みを発表しました。',
+    Cover_Image: { url: '/assets/galary/a1.png' },
+    publishedAt: '2024-01-05',
+  },
+  {
+    id: 2,
+    Title_en: 'Article 2: Interview with the CEO',
+    Title_jp: '記事2：CEOへのインタビュー',
+    Description_en: 'An exclusive interview with the CEO of CELITIS about future plans.',
+    Description_jp: 'CELITISのCEOに今後の計画について独占インタビュー。',
+    Cover_Image: { url: '/assets/galary/a2.png' },
+    publishedAt: '2024-01-12',
+  },
+  {
+    id: 3,
+    Title_en: 'Article 3: Community Event Highlights',
+    Title_jp: '記事3：コミュニティイベントのハイライト',
+    Description_en: 'Highlights from our recent community event.',
+    Description_jp: '最近のコミュニティイベントのハイライトをご紹介します。',
+    Cover_Image: { url: '/assets/galary/a3.png' },
+    publishedAt: '2024-01-19',
+  },
+  {
+    id: 4,
+    Title_en: 'Article 4: Technology for Good',
+    Title_jp: '記事4：善のためのテクノロジー',
+    Description_en: 'How CELITIS uses technology to make a positive impact.',
+    Description_jp: 'CELITISがどのようにテクノロジーを活用して社会に貢献しているか。',
+    Cover_Image: { url: '/assets/galary/a4.png' },
+    publishedAt: '2024-01-26',
+  },
+  {
+    id: 5,
+    Title_en: 'Article 5: Volunteer Stories',
+    Title_jp: '記事5：ボランティアの物語',
+    Description_en: 'Stories from our amazing volunteers.',
+    Description_jp: '素晴らしいボランティアの皆さんの物語。',
+    Cover_Image: { url: '/assets/galary/a5.png' },
+    publishedAt: '2024-02-02',
+  },
+  {
+    id: 6,
+    Title_en: 'Article 6: Educational Programs',
+    Title_jp: '記事6：教育プログラム',
+    Description_en: 'An overview of our educational programs.',
+    Description_jp: '私たちの教育プログラムの概要。',
+    Cover_Image: { url: '/assets/galary/a6.png' },
+    publishedAt: '2024-02-09',
+  },
+  {
+    id: 7,
+    Title_en: 'Article 7: Partnership Announcements',
+    Title_jp: '記事7：パートナーシップ発表',
+    Description_en: 'Announcing new partnerships for greater impact.',
+    Description_jp: 'より大きな影響を与えるための新しいパートナーシップを発表。',
+    Cover_Image: { url: '/assets/galary/a7.png' },
+    publishedAt: '2024-02-16',
+  },
+  {
+    id: 8,
+    Title_en: 'Article 8: Sustainability Efforts',
+    Title_jp: '記事8：持続可能性への取り組み',
+    Description_en: 'CELITIS\'s efforts towards sustainability.',
+    Description_jp: 'CELITISの持続可能性への取り組み。',
+    Cover_Image: { url: '/assets/galary/a8.png' },
+    publishedAt: '2024-02-23',
+  },
+  {
+    id: 9,
+    Title_en: 'Article 9: Looking Ahead',
+    Title_jp: '記事9：これからの展望',
+    Description_en: 'What\'s next for CELITIS?',
+    Description_jp: 'CELITISの今後の展望。',
+    Cover_Image: { url: '/assets/galary/a9.png' },
+    publishedAt: '2024-03-01',
+  },
+  {
+    id: 10,
+    Title_en: 'Article 10: Q&A with Supporters',
+    Title_jp: '記事10：サポーターとのQ&A',
+    Description_en: 'We answer questions from our supporters.',
+    Description_jp: 'サポーターの皆さんからの質問にお答えします。',
+    Cover_Image: { url: '/assets/galary/a10.png' },
+    publishedAt: '2024-03-08',
+  },
+];
 
 const HeroSVG = () => (
   <svg className="absolute left-0 top-0 w-full h-40 md:h-56 opacity-20 pointer-events-none select-none" viewBox="0 0 1440 320" fill="none"><path fill="url(#grad)" fillOpacity="1" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" /><defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#a5b4fc"/><stop offset="100%" stopColor="#fef9c3"/></linearGradient></defs></svg>
@@ -56,23 +133,15 @@ const GridAccent = () => (
 
 export default function Articles() {
   const { t, i18n } = useTranslation();
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Article | null>(null);
-  const locale = i18n.language || 'en';
   const [copied, setCopied] = useState(false);
-  const { setModalOpen } = useModal();
+  const [locale, setLocale] = useState(i18n.language || 'en');
 
   useEffect(() => {
-    fetchStrapiCollection('articles', locale)
-      .then((data) => setArticles(data.map(mapStrapiArticle)))
-      .finally(() => setLoading(false));
-  }, [locale]);
-
-  useEffect(() => {
-    setModalOpen(selected != null);
-    return () => setModalOpen(false);
-  }, [selected, setModalOpen]);
+    const handleLangChange = (lng: string) => setLocale(lng);
+    i18n.on('languageChanged', handleLangChange);
+    return () => i18n.off('languageChanged', handleLangChange);
+  }, [i18n]);
 
   const handleCopy = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -91,9 +160,11 @@ export default function Articles() {
         </h1>
         <p className="text-lg md:text-xl text-indigo-800 font-light mb-2 flex items-center justify-center gap-2">
           <SparklesIcon className="w-6 h-6 text-amber-400 inline-block animate-pulse" />
-          {t('articles_hero_subtitle')}
+          {locale.startsWith('ja')
+            ? '希望を灯し、心をつなぎ、世界を変えるストーリーを――一つの記事から。'
+            : 'Stories that spark hope, bridge hearts, and change the world—one article at a time.'}
         </p>
-        <span className="inline-block bg-emerald-100 text-emerald-700 rounded-full px-4 py-1 text-xs font-semibold shadow mt-2">{articles.length} {t('articles')}</span>
+        <span className="inline-block bg-emerald-100 text-emerald-700 rounded-full px-4 py-1 text-xs font-semibold shadow mt-2">{HARDCODED_ARTICLES.length} {locale.startsWith('ja') ? '記事' : 'Articles'}</span>
       </section>
       {/* Mission/Why Read Section */}
       <section className="max-w-2xl mx-auto mb-12 animate-fade-in">
@@ -104,42 +175,38 @@ export default function Articles() {
       </section>
       <main className="relative z-10 max-w-6xl mx-auto pb-16 px-2 md:px-6">
         <GridAccent />
-        <div className="text-center text-2xl font-bold text-indigo-700 mb-6 animate-fade-in">{t('articles_grid_headline')}</div>
-        {loading ? (
-          <p className="text-center text-gray-400">{t('loading')}</p>
-        ) : articles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
-            <svg width="120" height="120" fill="none" viewBox="0 0 24 24" className="mb-4 text-blue-200"><circle cx="12" cy="12" r="10" fill="currentColor" /><path d="M8 12h8M8 16h5" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" /><circle cx="9" cy="9" r="1" fill="#3b82f6" /><circle cx="15" cy="9" r="1" fill="#3b82f6" /></svg>
-            <p className="text-center text-gray-400 text-lg">{t('coming_soon')}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
-            {articles.map((article, idx) => (
-              <div key={article.id} className="relative group bg-white/70 backdrop-blur-lg border border-blue-100 rounded-3xl shadow-2xl flex flex-col items-center cursor-pointer hover:shadow-emerald-300 hover:scale-[1.04] transition-all duration-300 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-300 p-8 animate-slide-up" style={{animationDelay: `${idx * 60}ms`}} tabIndex={0} aria-label={article.Title} onClick={() => setSelected(article)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setSelected(article); }}>
+        <div className="text-center text-2xl font-bold text-indigo-700 mb-6 animate-fade-in">
+          {locale.startsWith('ja')
+            ? '共に発見し、学び、成長しよう'
+            : 'Discover, Learn, and Grow Together'}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
+          {HARDCODED_ARTICLES.map((article, idx) => {
+            const title = locale.startsWith('ja') ? article.Title_jp : article.Title_en;
+            const description = locale.startsWith('ja') ? article.Description_jp : article.Description_en;
+            return (
+              <div key={article.id} className="relative group bg-white/70 backdrop-blur-lg border border-blue-100 rounded-3xl shadow-2xl flex flex-col items-center cursor-pointer hover:shadow-emerald-300 hover:scale-[1.04] transition-all duration-300 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-300 p-8 animate-slide-up" style={{animationDelay: `${idx * 60}ms`}} tabIndex={0} aria-label={title} onClick={() => setSelected(article)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setSelected(article); }}>
                 {/* Animated accent */}
                 <svg className="absolute -top-8 -right-8 w-24 h-24 opacity-30 animate-spin-slow" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="40" stroke="#a5b4fc" strokeWidth="8" strokeDasharray="20 10" /></svg>
                 {/* Floating badge */}
-                <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-400 to-amber-300 text-white px-4 py-1 rounded-full shadow-lg font-bold text-xs animate-bounce z-10">📰 {t('article')}</span>
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-400 to-amber-300 text-white px-4 py-1 rounded-full shadow-lg font-bold text-xs animate-bounce z-10">📰 {locale.startsWith('ja') ? '記事' : 'Article'}</span>
                 {article.Cover_Image?.url ? (
-                  <Image src={STRAPI_URL + article.Cover_Image.url} alt={article.Title} width={400} height={192} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" onError={e => (e.currentTarget.style.display = 'none')} />
+                  <Image src={article.Cover_Image.url} alt={title} width={400} height={192} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" onError={e => (e.currentTarget.style.display = 'none')} />
                 ) : (
                   <div className="w-full h-48 flex items-center justify-center bg-blue-50 text-blue-200 text-4xl">📰</div>
                 )}
                 <div className="p-5 w-full flex-1 flex flex-col">
-                  <h2 className="text-lg font-bold mb-1 text-center text-indigo-800 group-hover:text-blue-700 transition line-clamp-2">{article.Title}</h2>
-                  {(article.publishedAt || article.Publish_Date) && <div className="text-xs text-gray-500 mb-2 text-center">{t('published')}: {new Date(article.publishedAt || article.Publish_Date || '').toLocaleDateString(locale)}</div>}
-                  <div className="text-xs text-gray-700 text-center whitespace-normal break-words line-clamp-3 mb-2 mt-2 animate-fade-in delay-100">{Array.isArray(article.Description)
-                    ? article.Description.map((d: { children?: { text: string }[] }) => Array.isArray(d.children) ? d.children.map((c: { text: string }) => c.text).join(' ') : '').join(' ')
-                    : article.Description}
-                  </div>
+                  <h2 className="text-lg font-bold mb-1 text-center text-indigo-800 group-hover:text-blue-700 transition line-clamp-2">{title}</h2>
+                  {article.publishedAt && <div className="text-xs text-gray-500 mb-2 text-center">{locale.startsWith('ja') ? '公開日' : 'Published'}: {new Date(article.publishedAt).toLocaleDateString(locale)}</div>}
+                  <div className="text-xs text-gray-700 text-center whitespace-normal break-words line-clamp-3 mb-2 mt-2 animate-fade-in delay-100">{description}</div>
                   <div className="flex items-center gap-2 mt-auto justify-center">
                     <span className="inline-block bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{locale.toUpperCase()}</span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
         {/* Modal */}
         {selected && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm mx-2" onClick={() => setSelected(null)}>
@@ -148,30 +215,17 @@ export default function Articles() {
                 <XMarkIcon className="w-7 h-7" />
               </button>
               {selected.Cover_Image?.url && (
-                <Image src={STRAPI_URL + selected.Cover_Image.url} alt={selected.Title} width={400} height={128} className="w-full h-32 object-cover rounded mb-4" />
+                <Image src={selected.Cover_Image.url} alt={locale.startsWith('ja') ? selected.Title_jp : selected.Title_en} width={400} height={128} className="w-full h-32 object-cover rounded mb-4" />
               )}
-              <h2 className="text-2xl font-bold mb-2 text-indigo-900 text-center">{selected.Title}</h2>
-              {(selected.publishedAt || selected.Publish_Date) && <div className="text-xs text-gray-500 mb-2 text-center">{t('published')}: {new Date(selected.publishedAt || selected.Publish_Date || '').toLocaleDateString(locale)}</div>}
-              <div className="mb-4 text-gray-700 text-center">
-                {Array.isArray(selected.Description)
-                  ? selected.Description.map((d: { children?: { text: string }[] }) => Array.isArray(d.children) ? d.children.map((c: { text: string }) => c.text).join(' ') : '').join(' ')
-                  : selected.Description}
-              </div>
+              <h2 className="text-2xl font-bold mb-2 text-indigo-900 text-center">{locale.startsWith('ja') ? selected.Title_jp : selected.Title_en}</h2>
+              {selected.publishedAt && <div className="text-xs text-gray-500 mb-2 text-center">{locale.startsWith('ja') ? '公開日' : 'Published'}: {new Date(selected.publishedAt).toLocaleDateString(locale)}</div>}
+              <div className="mb-4 text-gray-700 text-center">{locale.startsWith('ja') ? selected.Description_jp : selected.Description_en}</div>
               <div className="flex gap-3 mt-4 flex-wrap justify-center">
-                {selected.Files?.url && (
-                  <a
-                    href={STRAPI_URL + selected.Files.url}
-                    download={selected.Files.name}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow"
-                  >
-                    <ArrowDownTrayIcon className="w-5 h-5" /> {t('download')}
-                  </a>
-                )}
                 <button
                   onClick={() => handleCopy(window.location.href)}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 shadow"
                 >
-                  <ShareIcon className="w-5 h-5" /> {copied ? t('copied') || 'Copied!' : t('share') || 'Share'}
+                  <ShareIcon className="w-5 h-5" /> {copied ? (locale.startsWith('ja') ? 'コピーしました！' : 'Copied!') : (locale.startsWith('ja') ? '共有' : 'Share')}
                 </button>
               </div>
             </div>

@@ -2,40 +2,53 @@
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { fetchStrapiCollection } from '../../lib/strapi';
 import '../../i18n';
 import { HeartIcon, GlobeAltIcon, UserGroupIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
 interface Supporter {
   id: number;
-  Name: string;
+  Name_en: string;
+  Name_jp: string;
+  Description_en: string;
+  Description_jp: string;
   Logo?: { url?: string };
   Website?: string;
   Donation_Link?: string;
-  Description?: string;
-  publishedAt?: string;
 }
 
-function mapStrapiSupporter(entry: Record<string, unknown>): Supporter {
-  return {
-    id: entry.id as number,
-    Name: entry.Name as string,
-    Logo: entry.Logo ? { url: (entry.Logo as { url?: string }).url } : undefined,
-    Website: entry.Website as string | undefined,
-    Donation_Link: entry.Donation_Link as string | undefined,
-    Description: entry.Description as string | undefined,
-    publishedAt: entry.publishedAt as string | undefined,
-  };
-}
-
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || '';
-const YOUTUBE_URL = 'https://youtube.com/@smallstepchannel';
-
-function formatUrl(url?: string) {
-  if (!url) return '';
-  return url.startsWith('http://') || url.startsWith('https://') ? url : 'http://' + url;
-}
+const HARDCODED_SUPPORTERS: Supporter[] = [
+  {
+    id: 1,
+    Name_en: 'Upvista Inc.',
+    Name_jp: 'アップビスタ株式会社',
+    Description_en: 'A leading supporter of CELITIS, empowering communities through technology.',
+    Description_jp: 'CELITISを支援するリーディングカンパニー。テクノロジーでコミュニティを強化します。',
+    Logo: { url: '/assets/galary/a1.png' },
+    Website: 'https://upvista.com',
+    Donation_Link: 'https://upvista.com/donate',
+  },
+  {
+    id: 2,
+    Name_en: 'Global Hearts',
+    Name_jp: 'グローバルハーツ',
+    Description_en: 'Connecting hearts and minds for a better world.',
+    Description_jp: 'より良い世界のために心と心をつなげます。',
+    Logo: { url: '/assets/galary/a2.png' },
+    Website: 'https://globalhearts.org',
+    Donation_Link: 'https://globalhearts.org/donate',
+  },
+  {
+    id: 3,
+    Name_en: 'Nihon Unity',
+    Name_jp: '日本ユニティ',
+    Description_en: 'Promoting unity and inclusion in Japan.',
+    Description_jp: '日本での団結とインクルージョンを推進します。',
+    Logo: { url: '/assets/galary/a3.png' },
+    Website: 'https://nihonunity.jp',
+    Donation_Link: 'https://nihonunity.jp/donate',
+  },
+];
 
 const HeroSVG = () => (
   <svg className="absolute left-0 top-0 w-full h-40 md:h-56 opacity-20 pointer-events-none select-none" viewBox="0 0 1440 320" fill="none"><path fill="url(#grad)" fillOpacity="1" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" /><defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#a5b4fc"/><stop offset="100%" stopColor="#fef9c3"/></linearGradient></defs></svg>
@@ -92,16 +105,14 @@ const GridAccent = () => (
 
 export default function Supporters() {
   const { t, i18n } = useTranslation();
-  const [supporters, setSupporters] = useState<Supporter[]>([]);
-  const [loading, setLoading] = useState(true);
-  const locale = i18n.language || 'en';
   const [selectedSupporter, setSelectedSupporter] = useState<Supporter | null>(null);
+  const [locale, setLocale] = useState(i18n.language || 'en');
 
   useEffect(() => {
-    fetchStrapiCollection('supporters', locale)
-      .then((data) => setSupporters(data.map(mapStrapiSupporter)))
-      .finally(() => setLoading(false));
-  }, [locale]);
+    const handleLangChange = (lng: string) => setLocale(lng);
+    i18n.on('languageChanged', handleLangChange);
+    return () => i18n.off('languageChanged', handleLangChange);
+  }, [i18n]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-900 relative px-4 sm:px-6 md:px-8 overflow-x-hidden">
@@ -114,7 +125,7 @@ export default function Supporters() {
           <SparklesIcon className="w-6 h-6 text-amber-400 inline-block animate-pulse" />
           {t('supporters_hero_subtitle')}
         </p>
-        <span className="inline-block bg-emerald-100 text-emerald-700 rounded-full px-4 py-1 text-xs font-semibold shadow mt-2">{supporters.length} {t('supporters')}</span>
+        <span className="inline-block bg-emerald-100 text-emerald-700 rounded-full px-4 py-1 text-xs font-semibold shadow mt-2">{HARDCODED_SUPPORTERS.length} {locale.startsWith('ja') ? 'サポーター' : 'Supporters'}</span>
       </section>
       {/* Founder Story & Why Support Section */}
       <section className="max-w-2xl mx-auto mb-12 animate-fade-in">
@@ -133,7 +144,7 @@ export default function Supporters() {
             <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
               <h2 className="text-3xl md:text-4xl font-extrabold text-rose-600 mb-2 drop-shadow">{t('supporters_youtube_title')}</h2>
               <p className="text-lg md:text-xl text-indigo-800 font-light mb-4">{t('supporters_youtube_subtitle')}</p>
-              <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-3 rounded-full bg-gradient-to-r from-rose-500 to-amber-400 text-white font-bold text-xl shadow-lg hover:scale-105 hover:from-amber-400 hover:to-rose-500 transition-transform duration-200 animate-pulse">
+              <a href="https://youtube.com/@smallstepchannel" target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-3 rounded-full bg-gradient-to-r from-rose-500 to-amber-400 text-white font-bold text-xl shadow-lg hover:scale-105 hover:from-amber-400 hover:to-rose-500 transition-transform duration-200 animate-pulse">
                 {t('supporters_youtube_title')}
               </a>
             </div>
@@ -156,57 +167,37 @@ export default function Supporters() {
       {/* Supporters Grid Section */}
       <GridAccent />
       <div className="text-center text-2xl font-bold text-indigo-700 mb-6 animate-fade-in">{t('supporters_our_supporters')}</div>
-      {loading ? (
-        <p className="text-center text-gray-400 animate-fade-in">{t('loading')}</p>
-      ) : supporters.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
-          <UserGroupIcon className="w-20 h-20 text-blue-200 mb-4" />
-          <p className="text-center text-gray-400 text-lg">{t('supporters_no_supporters')}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade-in">
-          {supporters.map((sup, idx) => (
-            <div key={sup.id} className="relative group bg-white/70 backdrop-blur-lg border border-blue-100 rounded-3xl shadow-2xl flex flex-col items-center cursor-pointer hover:shadow-emerald-300 hover:scale-[1.04] transition-all duration-300 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-300 p-8 animate-slide-up" tabIndex={0} aria-label={sup.Name} style={{animationDelay: `${idx * 60}ms`}}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade-in">
+        {HARDCODED_SUPPORTERS.map((sup, idx) => {
+          const name = locale.startsWith('ja') ? sup.Name_jp : sup.Name_en;
+          const description = locale.startsWith('ja') ? sup.Description_jp : sup.Description_en;
+          return (
+            <div key={sup.id} className="relative group bg-white/70 backdrop-blur-lg border border-blue-100 rounded-3xl shadow-2xl flex flex-col items-center cursor-pointer hover:shadow-emerald-300 hover:scale-[1.04] transition-all duration-300 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-300 p-8 animate-slide-up" tabIndex={0} aria-label={name} style={{animationDelay: `${idx * 60}ms`}}>
               {/* Animated accent */}
               <svg className="absolute -top-8 -right-8 w-24 h-24 opacity-30 animate-spin-slow" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="40" stroke="#a5b4fc" strokeWidth="8" strokeDasharray="20 10" /></svg>
               {/* Floating badge */}
-              <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-rose-400 to-amber-300 text-white px-4 py-1 rounded-full shadow-lg font-bold text-xs animate-bounce z-10">🌟 Supporter</span>
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-rose-400 to-amber-300 text-white px-4 py-1 rounded-full shadow-lg font-bold text-xs animate-bounce z-10">🌟 {locale.startsWith('ja') ? 'サポーター' : 'Supporter'}</span>
               {sup.Logo?.url ? (
-                <Image src={STRAPI_URL + sup.Logo.url} alt={sup.Name} width={80} height={80} className="w-20 h-20 object-contain rounded-full border-4 border-white shadow-lg bg-white" onError={e => (e.currentTarget.style.display = 'none')} />
+                <Image src={sup.Logo.url} alt={name} width={80} height={80} className="w-20 h-20 object-contain rounded-full border-4 border-white shadow-lg bg-white" onError={e => (e.currentTarget.style.display = 'none')} />
               ) : (
                 <UserGroupIcon className="w-20 h-20 text-blue-200 mb-2" />
               )}
-              <h2 className="text-lg font-extrabold mb-1 text-center text-indigo-800 group-hover:text-blue-700 transition drop-shadow-lg">{sup.Name}</h2>
-              <div className="text-xs text-gray-700 text-center whitespace-normal break-words line-clamp-3 mb-2 mt-2 animate-fade-in delay-100">
-                {sup.Description}
-                {sup.Description && sup.Description.length > 120 && (
-                  <>
-                    <span className="inline-block align-middle">... </span>
-                    <button
-                      className="text-emerald-600 underline hover:text-rose-500 ml-1 text-xs font-semibold"
-                      onClick={e => { e.stopPropagation(); setSelectedSupporter(sup); }}
-                    >
-                      Read more
-                    </button>
-                  </>
-                )}
-              </div>
+              <h2 className="text-lg font-extrabold mb-1 text-center text-indigo-800 group-hover:text-blue-700 transition drop-shadow-lg">{name}</h2>
+              <div className="text-xs text-gray-700 text-center whitespace-normal break-words line-clamp-3 mb-2 mt-2 animate-fade-in delay-100">{description}</div>
               <div className="flex flex-wrap gap-2 mt-auto justify-center">
                 {sup.Website && (
-                  <a href={formatUrl(sup.Website)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold hover:bg-blue-200 transition">
+                  <a href={sup.Website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold hover:bg-blue-200 transition">
                     <GlobeAltIcon className="w-4 h-4" /> {t('supporters_website')}
                   </a>
                 )}
-                {sup.Donation_Link && (
-                  <a href={formatUrl(sup.Donation_Link)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500 text-white rounded-full text-xs font-semibold hover:bg-emerald-600 transition">
-                    <HeartIcon className="w-4 h-4" /> {t('supporters_donate_now')}
-                  </a>
-                )}
+                <Link href="/donate" className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500 text-white rounded-full text-xs font-semibold hover:bg-emerald-600 transition">
+                  <HeartIcon className="w-4 h-4" /> {t('supporters_donate_now')}
+                </Link>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
       {/* Thank You Section */}
       <section className="max-w-2xl mx-auto mt-12 mb-4 text-center animate-fade-in">
         <div className="text-lg md:text-xl text-emerald-700 font-semibold">{t('supporters_grid_thankyou')}</div>
@@ -237,9 +228,9 @@ export default function Supporters() {
             <button className="absolute top-3 right-3 text-gray-400 hover:text-rose-600 z-10" onClick={() => setSelectedSupporter(null)} aria-label="Close">
               <XMarkIcon className="w-7 h-7" />
             </button>
-            <h2 className="text-xl font-bold mb-2 text-indigo-900 text-center">{selectedSupporter.Name}</h2>
+            <h2 className="text-xl font-bold mb-2 text-indigo-900 text-center">{selectedSupporter.Name_en}</h2>
             <div className="mb-2 text-gray-700 text-center whitespace-pre-line break-words">
-              {selectedSupporter.Description}
+              {selectedSupporter.Description_en}
             </div>
           </div>
         </div>

@@ -192,9 +192,10 @@ export default function AboutPage() {
         {/* Founder Message Section */}
         <section className="mb-10 animate-fade-in">
           <h2 className="text-2xl font-bold text-emerald-700 mb-2">{content.founderTitle}</h2>
-          <blockquote className="relative bg-gradient-to-br from-emerald-50 via-white to-blue-50 border-l-4 border-emerald-400 rounded-2xl shadow p-6 my-4 animate-fade-in">
-            <span className="absolute left-4 top-4 text-4xl text-emerald-200 select-none">&quot;{content.founderQuote}&quot;</span>
-            <span className="block text-right text-blue-800 font-semibold mt-4">{content.founderName}</span>
+          <blockquote className="relative bg-gradient-to-br from-emerald-50 via-white to-blue-50 border-l-4 border-emerald-400 rounded-2xl shadow p-6 my-4 animate-fade-in flex flex-col gap-4">
+            <span className="text-4xl text-emerald-300 mb-2">“</span>
+            <p className="text-lg md:text-2xl text-emerald-700 font-medium leading-relaxed whitespace-pre-line">{content.founderQuote}</p>
+            <span className="block text-right text-blue-800 font-semibold mt-2">{content.founderName}</span>
           </blockquote>
         </section>
         {/* Join Us / Thank You Section */}
